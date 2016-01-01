@@ -13,7 +13,15 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
+        android:id="@+id/text_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!" />
+    <ListView
+        android:id="@+id/list_courses"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/text_list_header">
+
+    </ListView>
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package com.freeyuyuko.listencourse;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,6 +12,9 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
+    private UpdateCourseListTask mTask = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,5 +52,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private class UpdateCourseListTask extends AsyncTask<Void, Integer, Boolean>{
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return null;
+        }
     }
 }
