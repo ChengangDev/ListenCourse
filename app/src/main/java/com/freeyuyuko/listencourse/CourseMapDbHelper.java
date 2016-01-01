@@ -14,7 +14,7 @@ public class CourseMapDbHelper extends SQLiteOpenHelper {
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String INT_TYPE = " INTEGER";
-    private static final String DATE_TYPE = " DATE";
+    private static final String DATE_TYPE = " TEXT";
     private static final String COMMA_SEP = ",";
 
     private static final String SQL_CREATE_VIDEOS =
@@ -23,6 +23,7 @@ public class CourseMapDbHelper extends SQLiteOpenHelper {
                     CourseMap.Videos.COL_COURSE_NAME + TEXT_TYPE + COMMA_SEP +
                     CourseMap.Videos.COL_RAW_NAME + TEXT_TYPE + COMMA_SEP +
                     CourseMap.Videos.COL_SCHEDULE + INT_TYPE + COMMA_SEP +
+                    CourseMap.Videos.COL_LESSON_NAME + TEXT_TYPE + COMMA_SEP +
                     CourseMap.Videos.COL_CREATE_TIME + DATE_TYPE + COMMA_SEP +
                     CourseMap.Videos.COL_TAGS + TEXT_TYPE + COMMA_SEP +
                     " )";
@@ -35,6 +36,7 @@ public class CourseMapDbHelper extends SQLiteOpenHelper {
                     CourseMap.Courses.COL_COURSE_NAME + TEXT_TYPE + COMMA_SEP +
                     CourseMap.Courses.COL_CREATE_TIME + DATE_TYPE + COMMA_SEP +
                     CourseMap.Courses.COL_TAGS + TEXT_TYPE + COMMA_SEP +
+                    CourseMap.Courses.COL_COUNT + INT_TYPE + COMMA_SEP +
                     " )";
     private static final String SQL_DELETE_COURSES =
             "DROP TABLE IF EXISTS " + CourseMap.Courses.TABLE_NAME;

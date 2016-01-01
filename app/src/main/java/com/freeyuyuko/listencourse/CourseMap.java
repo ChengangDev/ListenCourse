@@ -20,7 +20,7 @@ public final class CourseMap {
         public static final String COL_SCHEDULE = "schedule";
         public static final String COL_CREATE_TIME = "create_time";
 
-        //public static final String COL_LESSON_NAME = "lesson_name";
+        public static final String COL_LESSON_NAME = "lesson_name";
         //public static final String COL_VIDEO_NAME = "video_name";
         //public static final String COL_TYPE = "type";
         //public static final String COL_COUNT = "count";
@@ -40,6 +40,6 @@ public final class CourseMap {
         //public static final String COL_LANGUAGE = "language";
         public static final String COL_TAGS = "tags";
         //public static final String COL_OTHER = "other";
-        //public static final String COL_COUNT = "count";
+        public static final String COL_COUNT = "count";
     }
 }
