@@ -18,6 +18,7 @@
             android:layout_height="match_parent"
             android:textSize="32sp"/>
         <TextView
+            android:id="@+id/text_material_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"/>

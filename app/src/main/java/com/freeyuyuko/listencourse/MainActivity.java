@@ -1,5 +1,7 @@
 package com.freeyuyuko.listencourse;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,11 +11,21 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
+
+import com.freeyuyuko.listencourse.CourseMap.Courses;
+
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private ListView mListViewCourse = null;
     private UpdateCourseListTask mTask = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +38,13 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Replace with your own action",
+                        Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
+
+        mListViewCourse = (ListView)findViewById(R.id.list_courses);
     }
 
     @Override
@@ -54,10 +69,75 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class UpdateCourseListTask extends AsyncTask<Void, Integer, Boolean>{
+    private class UpdateCourseListTask extends
+            AsyncTask<Void, Integer, Boolean>{
+        private Activity mAct;
+        private List<Map<String, String>> mCourses;
+
+        public UpdateCourseListTask(Activity act){
+            mAct = act;
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
         @Override
         protected Boolean doInBackground(Void... params) {
-            return null;
+            try{
+                DbOperator dbOperator = new DbOperator(mAct);
+                mCourses = dbOperator.getCoursesList();
+            }catch (final Exception e){
+                e.printStackTrace();
+                mAct.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mAct, e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if( !aBoolean ){
+                Toast.makeText(mAct, "Failed to get courses.",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try{
+                SimpleAdapter adpter = new SimpleAdapter(
+                        mAct, mCourses, R.layout.item_of_courses_list,
+                        new String[]{
+                                Courses._ID,
+                                Courses.COL_COURSE_NAME,
+                                Courses.COL_COUNT
+                        },
+                        new int[]{
+                                R.id.text_course_index,
+                                R.id.text_course_name,
+                                R.id.text_material_count
+                        }
+                );
+                mListViewCourse.setAdapter(adpter);
+                mListViewCourse.setOnItemClickListener(
+                        new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent,
+                                            View view, int position, long id) {
+
+                    }
+                });
+            }catch (Exception e){
+                e.printStackTrace();
+                Toast.makeText(mAct, e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+
+            }
         }
     }
 }

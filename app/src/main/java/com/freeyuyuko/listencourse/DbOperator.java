@@ -8,7 +8,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.freeyuyuko.listencourse.CourseMap.*;
 
@@ -22,6 +26,43 @@ public class DbOperator {
 
     public DbOperator(Context context){
         mCourseMapDbHelper = new CourseMapDbHelper(context);
+    }
+
+    public List<Map<String, String>> getCoursesList(){
+        SQLiteDatabase db = mCourseMapDbHelper.getReadableDatabase();
+        String[] projection = {Courses.COL_COURSE_NAME,
+        Courses.COL_CREATE_TIME, Courses.COL_COUNT, Courses.COL_TAGS};
+        String sortOrder = Courses.COL_CREATE_TIME + " DESC";
+
+        Cursor c = db.query(Courses.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder);
+        List<Map<String, String>> list = new ArrayList<Map<String,String>>();
+        if(c.getCount() == 0)
+            return list;
+
+        c.moveToFirst();
+        int i = 1;
+        do{
+            Map<String, String> map = new HashMap<String, String>();
+            map.put(Courses._ID, String.valueOf(i));
+            map.put(Courses.COL_COURSE_NAME,
+                    c.getString(c.getColumnIndexOrThrow(Courses.COL_COURSE_NAME)));
+            map.put(Courses.COL_CREATE_TIME,
+                    c.getString(c.getColumnIndexOrThrow(Courses.COL_CREATE_TIME)));
+            map.put(Courses.COL_COUNT,
+                    c.getString(c.getColumnIndexOrThrow(Courses.COL_COUNT)));
+            map.put(Courses.COL_TAGS,
+                    c.getString(c.getColumnIndexOrThrow(Courses.COL_TAGS)));
+            list.add(map);
+            ++i;
+        }while(c.moveToNext());
+
+        return list;
     }
 
     /**
