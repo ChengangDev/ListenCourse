@@ -7,7 +7,7 @@
         android:id="@+id/text_course_index"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:textSize="24sp"/>
+        android:textSize="32sp"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,7 +16,7 @@
             android:id="@+id/text_course_name"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:textSize="32sp"/>
+            android:textSize="16sp"/>
         <TextView
             android:id="@+id/text_material_count"
             android:layout_width="wrap_content"
