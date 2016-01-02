@@ -3,6 +3,7 @@ package com.freeyuyuko.listencourse;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,6 +21,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.freeyuyuko.listencourse.CourseMap.Courses;
+import com.freeyuyuko.listencourse.CourseMap.Videos;
 
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
             return true;
         }else if( id == R.id.action_add_course ){
             showAddCourse("");
@@ -180,7 +182,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             if( !aBoolean ){
-                Toast.makeText(mAct, "Failed to get courses.",
+                Toast.makeText(MainActivity.this, "Failed to get courses.",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -205,7 +207,12 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onItemClick(AdapterView<?> parent,
                                             View view, int position, long id) {
-
+                        Intent intent = new Intent(MainActivity.this,
+                                MaterialActivity.class);
+                        intent.putExtra(Courses.COL_COURSE_NAME,
+                                mCourses.get(position)
+                                        .get(Courses.COL_COURSE_NAME));
+                        MainActivity.this.startActivity(intent);
                     }
                 });
             }catch (Exception e){

@@ -4,7 +4,7 @@
     tools:context="com.freeyuyuko.listencourse.MainActivity">
 
     <item
-        android:id="@+id/action_add_course"
+        android:id="@+id/action_add_video"
         android:orderInCategory="100"
         android:title="Add"
         app:showAsAction="always" />

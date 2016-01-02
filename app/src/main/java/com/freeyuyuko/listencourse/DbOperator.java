@@ -22,6 +22,7 @@ import static com.freeyuyuko.listencourse.CourseMap.*;
 public class DbOperator {
     private static final String TAG = "DbOperator";
 
+    public static final String KEY_MANAGED_VIDEO_NAME = "managed_video_name";
     private CourseMapDbHelper mCourseMapDbHelper;
 
     public DbOperator(Context context){
@@ -42,13 +43,17 @@ public class DbOperator {
                 null,
                 sortOrder);
         List<Map<String, String>> list = new ArrayList<Map<String,String>>();
+        Map<String, String> map = new HashMap<String, String>();
+        map.put(Courses.COL_COURSE_NAME, "Others");
+        list.add(map);
+
         if(c.getCount() == 0)
             return list;
 
         c.moveToFirst();
         int i = 1;
         do{
-            Map<String, String> map = new HashMap<String, String>();
+            map = new HashMap<String, String>();
             map.put(Courses._ID, String.valueOf(i));
             map.put(Courses.COL_COURSE_NAME,
                     c.getString(c.getColumnIndexOrThrow(Courses.COL_COURSE_NAME)));
@@ -111,7 +116,7 @@ public class DbOperator {
         return count;
     }
 
-    public int setCourseCount(String course, int count){
+    private int setCourseCount(String course, int count){
         SQLiteDatabase db = mCourseMapDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         //values.put(CourseMap.Courses.COL_COURSE_NAME, course);
@@ -143,6 +148,61 @@ public class DbOperator {
         return c.getCount() > 0;
     }
 
+    public List<Map<String, String>> getVideosList(String courseName)
+        throws Exception{
+        if(courseName == null){
+            throw new Exception("Course Name is null.");
+        }
+
+        SQLiteDatabase db = mCourseMapDbHelper.getReadableDatabase();
+        String[] projection = {
+                Videos.COL_RAW_NAME,
+                Videos.COL_LESSON_NAME,
+                Videos.COL_SCHEDULE,
+                Videos.COL_CREATE_TIME,
+                Videos.COL_TAGS
+        };
+        String selection = Videos.COL_COURSE_NAME + " = ?";
+        String[] selectionArgs = {courseName};
+        String sortOrder = Videos.COL_SCHEDULE + " ASC";
+
+        Cursor c = db.query(Videos.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder);
+
+        List<Map<String, String>> list = new ArrayList<>();
+        if(c.getCount() == 0)
+            return list;
+
+        c.moveToFirst();
+        do{
+            Map<String, String> map = new HashMap<>();
+            map.put(Videos.COL_RAW_NAME, c.getString(
+                    c.getColumnIndexOrThrow(Videos.COL_RAW_NAME)
+            ));
+
+            int schedule = c.getInt(
+                    c.getColumnIndexOrThrow(Videos.COL_SCHEDULE));
+            map.put(Videos.COL_SCHEDULE, String.format("%3d", schedule));
+            map.put(Videos.COL_LESSON_NAME, c.getString(
+                    c.getColumnIndexOrThrow(Videos.COL_LESSON_NAME)
+            ));
+            map.put(KEY_MANAGED_VIDEO_NAME,
+                    getManagedVideoName(
+                            map.get(Videos.COL_RAW_NAME),
+                            schedule,
+                            map.get(Videos.COL_LESSON_NAME)
+                    ));
+
+            list.add(map);
+        }while(c.moveToNext());
+
+        return list;
+    }
     public boolean isVideoExist(String rawName){
         SQLiteDatabase db = mCourseMapDbHelper.getReadableDatabase();
         String[] projection = {Videos.COL_RAW_NAME};
@@ -228,7 +288,7 @@ public class DbOperator {
      * make schedule one after one, keep order
      * @param courseName
      */
-    public void vacuumVideoOf(String courseName){
+    private void vacuumVideoOf(String courseName){
         SQLiteDatabase db = mCourseMapDbHelper.getWritableDatabase();
         String[] projection = {Videos.COL_RAW_NAME};
         String selection = Videos.COL_COURSE_NAME + " = ?";
@@ -259,7 +319,7 @@ public class DbOperator {
      * When rawNamePreferred conflics, its schedule is preferred to be smaller.
      * @param courseName
      */
-    public void stretchVideoOf(String courseName, String rawNamePreferred)
+    private void stretchVideoOf(String courseName, String rawNamePreferred)
         throws Exception{
         SQLiteDatabase db = mCourseMapDbHelper.getWritableDatabase();
 
@@ -357,6 +417,21 @@ public class DbOperator {
         return dateFormat.format(date);
     }
 
+    public static String getManagedVideoName(String rawName, int schedule, String lessonName)
+        throws Exception{
+        if( rawName == null || rawName.isEmpty() )
+            throw new Exception("Raw Name can not be empty");
 
+        String[] str = rawName.split(".");
+        if(str.length != 2)
+            throw new Exception(String.format("%s can not be parsed."));
+
+        if(lessonName == null)
+            lessonName = "";
+
+
+        return String.format("%3d %s(%s).%s", schedule, lessonName,
+                str[0], str[1]);
+    }
 
 }
