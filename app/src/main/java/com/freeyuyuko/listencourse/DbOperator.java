@@ -23,6 +23,9 @@ public class DbOperator {
     private static final String TAG = "DbOperator";
 
     public static final String KEY_MANAGED_VIDEO_NAME = "managed_video_name";
+    public static final String KEY_MANAGED_SCRIPT_NAME = "managed_script_name";
+
+
     private CourseMapDbHelper mCourseMapDbHelper;
 
     public DbOperator(Context context){
@@ -197,7 +200,9 @@ public class DbOperator {
                             schedule,
                             map.get(Videos.COL_LESSON_NAME)
                     ));
-
+            map.put(KEY_MANAGED_SCRIPT_NAME,
+                    map.get(KEY_MANAGED_VIDEO_NAME)
+                        .replace(".mp4", ""));
             list.add(map);
         }while(c.moveToNext());
 
@@ -237,7 +242,7 @@ public class DbOperator {
         values.put(Videos.COL_SCHEDULE, countVideoOfCourse(courseName)+1);
         values.put(Videos.COL_TAGS, tags);
         values.put(Videos.COL_CREATE_TIME, getCurDateTime());
-
+        Log.d(TAG, String.format("Add Video:%s",values.toString()));
         db.insertOrThrow(Videos.TABLE_NAME, null, values);
 
         //update count in course
@@ -422,16 +427,17 @@ public class DbOperator {
         if( rawName == null || rawName.isEmpty() )
             throw new Exception("Raw Name can not be empty");
 
-        String[] str = rawName.split(".");
-        if(str.length != 2)
-            throw new Exception(String.format("%s can not be parsed."));
+        if(!rawName.endsWith(".mp4"))
+            throw new Exception(String.format("%s can not be parsed.", rawName));
+
+        String raw = rawName.replace(".mp4", "");
 
         if(lessonName == null)
             lessonName = "";
 
 
         return String.format("%3d %s(%s).%s", schedule, lessonName,
-                str[0], str[1]);
+                raw, "mp4");
     }
 
 }

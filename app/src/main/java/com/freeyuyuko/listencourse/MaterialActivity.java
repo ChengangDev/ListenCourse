@@ -51,6 +51,8 @@ public class MaterialActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mCourseName = intent.getExtras()
                 .getString(Courses.COL_COURSE_NAME);
+        if(mCourseName.equalsIgnoreCase("others"))
+            mCourseName = "";
 
         updateMaterialList();
     }

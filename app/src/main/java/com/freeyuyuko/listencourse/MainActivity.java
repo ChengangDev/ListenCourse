@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
     private ListView mListViewCourse = null;
-    private UpdateCourseListTask mTask = null;
+    private UpdateCourseListTask mCourseTask = null;
+    private RefreshDbTask mDbTask = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
+            refreshDb();
             return true;
         }else if( id == R.id.action_add_course ){
             showAddCourse("");
@@ -124,12 +126,21 @@ public class MainActivity extends AppCompatActivity
     private void updateCourseList(){
         mListViewCourse = (ListView)findViewById(R.id.list_courses);
 
-        if( mTask != null )
-            mTask.cancel(true);
+        if( mCourseTask != null )
+            mCourseTask.cancel(true);
 
-        mTask = new UpdateCourseListTask(this);
-        mTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, null);
+        mCourseTask = new UpdateCourseListTask(this);
+        mCourseTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, null);
 
+    }
+
+    private void refreshDb(){
+        if( mDbTask != null )
+            mDbTask.cancel(true);
+
+        mDbTask = new MainRefreshDbTask(this);
+        mDbTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                CourseApplication.getInstance().getCourseraPath());
     }
 
     private void showAddCourse(String input){
@@ -224,4 +235,28 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+    private class MainRefreshDbTask extends RefreshDbTask{
+        private static final String TAG = "MainRefreshDbTask";
+
+        public MainRefreshDbTask(Activity activity){
+            super(activity);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if(!aBoolean)
+                return;
+
+            try{
+                updateCourseList();
+                Toast.makeText(MainActivity.this, "Refresh success.",
+                        Toast.LENGTH_SHORT).show();
+            }catch (Exception e){
+                e.printStackTrace();
+                Toast.makeText(MainActivity.this, e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

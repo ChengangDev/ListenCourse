@@ -15,6 +15,8 @@ public class CourseApplication extends Application {
 
     private String mHomePath;
 
+    private String mCourseraPath;
+
     public static CourseApplication getInstance() {
         return ourInstance;
     }
@@ -31,6 +33,9 @@ public class CourseApplication extends Application {
                 .getAbsolutePath() + "/ListenCourse";
 
         Log.d(TAG, String.format("HomePath: %s", mHomePath));
+
+        mCourseraPath = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/Android/data/org.coursera.android/files/Download";
     }
 
     public String getHomePath(){
@@ -44,6 +49,10 @@ public class CourseApplication extends Application {
         String path = getHomePath() + "/"
                 + CourseMapDbHelper.DB_NAME;
         return path;
+    }
+
+    public String getCourseraPath(){
+        return mCourseraPath;
     }
 
     public String getCoursesPath(){
