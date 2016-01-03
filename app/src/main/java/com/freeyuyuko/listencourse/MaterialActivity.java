@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,7 @@ public class MaterialActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "OnCreate.");
         setContentView(R.layout.activity_material);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -58,6 +60,19 @@ public class MaterialActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "OnRestart.");
+        updateMaterialList();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "OnDestory.");
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_material, menu);
@@ -73,9 +88,14 @@ public class MaterialActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
+            updateMaterialList();
             return true;
         }else if( id == R.id.action_add_video ){
             //showAddCourse("");
+            return true;
+        }else if( id == android.R.id.home ){
+            Log.d(TAG, "On action home pressed.");
+            finish();
             return true;
         }
 
@@ -141,6 +161,8 @@ public class MaterialActivity extends AppCompatActivity {
                                             View view, int position, long id) {
                         Intent intent = new Intent(MaterialActivity.this,
                                 PlayerActivity.class);
+                        intent.putExtra(Videos.COL_RAW_NAME, mVideos
+                                .get(position).get(Videos.COL_RAW_NAME));
                         MaterialActivity.this.startActivity(intent);
                     }
                 });

@@ -1,19 +1,31 @@
 package com.freeyuyuko.listencourse;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
-public class PlayerActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+public class PlayerActivity extends AppCompatActivity
+    implements SingleSelectDialog.CallBackSingleSelectFinished{
+
+    private static final String TAG = "PlayerActivity";
+
+    private String mRawName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "OnCreate.");
         setContentView(R.layout.activity_player);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -27,6 +39,9 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        Bundle bundle = getIntent().getExtras();
+        mRawName = bundle.getString(CourseMap.Videos.COL_RAW_NAME);
     }
 
     @Override
@@ -45,12 +60,65 @@ public class PlayerActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_move) {
+            showSelectCourse(mRawName);
             return true;
         }else if( id == R.id.action_add_video ){
             //showAddCourse("");
             return true;
+        }else if( id == android.R.id.home ){
+            finish();
+            return true; //will not be handled
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void OnSingleSelectFinished(String select, boolean bOk) {
+
+        if(!bOk)
+            return;
+
+        Log.d(TAG, String.format("SingleSelectDialog return:%s", select));
+        try{
+            if(select == null){
+                Toast.makeText(this, "No course is selected.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if(select.equalsIgnoreCase("Others"))
+                select = "";
+
+            //thread be better
+            DbOperator operator = new DbOperator(this);
+            operator.moveVideoTo(mRawName, select, operator.getCourseCount(
+                    operator.getCourseNameOfVideo(mRawName)));
+            //return
+            finish();
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
+        }
+    }
+
+    private void showSelectCourse(String rawName){
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putString("title", "Select Course");
+
+            DbOperator operator = new DbOperator(this);
+            List<Map<String,String>> listMap = operator.getCoursesList();
+            ArrayList<String> list = new ArrayList<>();
+            for(int i = 0; i < listMap.size(); ++i ){
+                list.add(listMap.get(i).get(CourseMap.Courses.COL_COURSE_NAME));
+            }
+            bundle.putStringArrayList("list", list);
+            SingleSelectDialog dlg = new SingleSelectDialog();
+            dlg.setArguments(bundle);
+            dlg.show(getFragmentManager(), "Select Course");
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -6,8 +6,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.View;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -18,6 +17,7 @@ import java.lang.reflect.Constructor;
  */
 public class InputDialog extends DialogFragment {
 
+    private static final String TAG = "InputDialog";
     private EditText mEditView;
 
     public InputDialog(){
@@ -26,6 +26,7 @@ public class InputDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Log.d(TAG, "OnCreateDialog.");
         Bundle args = getArguments();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(args.getString("title"))

@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
@@ -32,6 +31,10 @@ public class DbOperator {
         mCourseMapDbHelper = new CourseMapDbHelper(context);
     }
 
+    /**
+     * 
+     * @return not null
+     */
     public List<Map<String, String>> getCoursesList(){
         SQLiteDatabase db = mCourseMapDbHelper.getReadableDatabase();
         String[] projection = {Courses.COL_COURSE_NAME,
@@ -56,7 +59,7 @@ public class DbOperator {
         c.moveToFirst();
         int i = 1;
         do{
-            map = new HashMap<String, String>();
+            map = new HashMap<>();
             map.put(Courses._ID, String.valueOf(i));
             map.put(Courses.COL_COURSE_NAME,
                     c.getString(c.getColumnIndexOrThrow(Courses.COL_COURSE_NAME)));
@@ -190,7 +193,7 @@ public class DbOperator {
 
             int schedule = c.getInt(
                     c.getColumnIndexOrThrow(Videos.COL_SCHEDULE));
-            map.put(Videos.COL_SCHEDULE, String.format("%3d", schedule));
+            map.put(Videos.COL_SCHEDULE, String.format("%03d", schedule));
             map.put(Videos.COL_LESSON_NAME, c.getString(
                     c.getColumnIndexOrThrow(Videos.COL_LESSON_NAME)
             ));
@@ -242,7 +245,7 @@ public class DbOperator {
         values.put(Videos.COL_SCHEDULE, countVideoOfCourse(courseName)+1);
         values.put(Videos.COL_TAGS, tags);
         values.put(Videos.COL_CREATE_TIME, getCurDateTime());
-        Log.d(TAG, String.format("Add Video:%s",values.toString()));
+        Log.d(TAG, String.format("Add Video:%s", values.toString()));
         db.insertOrThrow(Videos.TABLE_NAME, null, values);
 
         //update count in course
@@ -278,16 +281,18 @@ public class DbOperator {
 
         //remove from old course and vacuum old schedule
         String fromCourseName = getCourseNameOfVideo(rawName);
-        setVideo(rawName, Videos.COL_COURSE_NAME, "");
-        vacuumVideoOf(fromCourseName);
-        setCourseCount(fromCourseName, countVideoOfCourse(fromCourseName));
-
+        if( !fromCourseName.equals(toCourseName) ) {
+            setVideo(rawName, Videos.COL_COURSE_NAME, toCourseName);
+            vacuumVideoOf(fromCourseName);
+            setCourseCount(fromCourseName, countVideoOfCourse(fromCourseName));
+        }
         //add to new course
-        setVideo(rawName, Videos.COL_COURSE_NAME, toCourseName);
         setVideo(rawName, Videos.COL_SCHEDULE, String.valueOf(schedule));
         stretchVideoOf(toCourseName, rawName);
         setCourseCount(toCourseName, countVideoOfCourse(toCourseName));
     }
+
+
 
     /**
      * make schedule one after one, keep order
@@ -307,6 +312,9 @@ public class DbOperator {
                 null,
                 null,
                 sortOrder);
+
+        if(c.getCount() == 0)
+            return;
 
         c.moveToFirst();
         int i = 1;
@@ -331,9 +339,9 @@ public class DbOperator {
         int pivot = getScheduleOfVideo(rawNamePreferred);
         String rawSql = String.format(
                 "update %s set %s = %s + 1 where " +
-                        "%s = %s and " +
+                        "%s = '%s' and " +
                         "%s >= %d and " +
-                        "%s != %s",
+                        "%s != '%s'",
                 Videos.TABLE_NAME, Videos.COL_SCHEDULE, Videos.COL_SCHEDULE,
                 Videos.COL_COURSE_NAME, courseName,
                 Videos.COL_SCHEDULE, pivot,
@@ -436,7 +444,7 @@ public class DbOperator {
             lessonName = "";
 
 
-        return String.format("%3d %s(%s).%s", schedule, lessonName,
+        return String.format("%03d %s(%s).%s", schedule, lessonName,
                 raw, "mp4");
     }
 

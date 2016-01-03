@@ -21,7 +21,6 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.freeyuyuko.listencourse.CourseMap.Courses;
-import com.freeyuyuko.listencourse.CourseMap.Videos;
 
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "OnCreate.");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -54,6 +54,25 @@ public class MainActivity extends AppCompatActivity
         mListViewCourse = (ListView)findViewById(R.id.list_courses);
 
         updateCourseList();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "OnRestart.");
+        updateCourseList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "OnResume.");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "OnDestroy");
     }
 
     @Override
@@ -77,6 +96,8 @@ public class MainActivity extends AppCompatActivity
         }else if( id == R.id.action_add_course ){
             showAddCourse("");
             return true;
+        }else if( id == android.R.id.home ){
+
         }
 
         return super.onOptionsItemSelected(item);
