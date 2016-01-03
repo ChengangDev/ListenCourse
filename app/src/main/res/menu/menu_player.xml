@@ -4,9 +4,9 @@
     tools:context="com.freeyuyuko.listencourse.MainActivity">
 
     <item
-        android:id="@+id/action_add_video"
+        android:id="@+id/action_delete_video"
         android:orderInCategory="100"
-        android:title="Add"
+        android:title="DEL"
         app:showAsAction="always" />
 
     <item

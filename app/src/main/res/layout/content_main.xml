@@ -16,7 +16,8 @@
         android:id="@+id/text_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:textSize="32sp"
+        android:text="All Courses" />
     <ListView
         android:id="@+id/list_courses"
         android:layout_width="match_parent"

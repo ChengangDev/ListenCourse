@@ -19,6 +19,8 @@ import android.widget.Toast;
 import com.freeyuyuko.listencourse.CourseMap.Courses;
 import com.freeyuyuko.listencourse.CourseMap.Videos;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -163,6 +165,12 @@ public class MaterialActivity extends AppCompatActivity {
                                 PlayerActivity.class);
                         intent.putExtra(Videos.COL_RAW_NAME, mVideos
                                 .get(position).get(Videos.COL_RAW_NAME));
+                        ArrayList<HashMap<String,String>> list = new ArrayList<>();
+                        for(int i = 0; i < mVideos.size(); ++i)
+                            list.add(new HashMap<String, String>(mVideos.get(i)));
+                        intent.putExtra("list", list);
+                        for(int i = 0; i < mVideos.size(); ++i)
+
                         MaterialActivity.this.startActivity(intent);
                     }
                 });

@@ -22,6 +22,7 @@ public class PlayerActivity extends AppCompatActivity
     private static final String TAG = "PlayerActivity";
 
     private String mRawName;
+    private List<Map<String,String>> mPlayList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +43,13 @@ public class PlayerActivity extends AppCompatActivity
 
         Bundle bundle = getIntent().getExtras();
         mRawName = bundle.getString(CourseMap.Videos.COL_RAW_NAME);
+        mPlayList = (List<Map<String,String>>)bundle.getSerializable("list");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "OnRestart.");
     }
 
     @Override
@@ -62,8 +70,9 @@ public class PlayerActivity extends AppCompatActivity
         if (id == R.id.action_move) {
             showSelectCourse(mRawName);
             return true;
-        }else if( id == R.id.action_add_video ){
-            //showAddCourse("");
+        }else if( id == R.id.action_delete_video ){
+            deleteFromList(mRawName);
+            finish();
             return true;
         }else if( id == android.R.id.home ){
             finish();
@@ -116,6 +125,15 @@ public class PlayerActivity extends AppCompatActivity
             SingleSelectDialog dlg = new SingleSelectDialog();
             dlg.setArguments(bundle);
             dlg.show(getFragmentManager(), "Select Course");
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void deleteFromList(String rawName){
+        try{
+
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
