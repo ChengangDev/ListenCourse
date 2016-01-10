@@ -1,7 +1,9 @@
 package com.freeyuyuko.listencourse;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,12 @@ public class PlayerActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "OnCreate.");
+
+        if(savedInstanceState != null)
+        {
+            Log.d(TAG, "ReCreate.");
+            finish();
+        }
         setContentView(R.layout.activity_player);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -44,12 +53,35 @@ public class PlayerActivity extends AppCompatActivity
         Bundle bundle = getIntent().getExtras();
         mRawName = bundle.getString(CourseMap.Videos.COL_RAW_NAME);
         mPlayList = (List<Map<String,String>>)bundle.getSerializable("list");
+
+        try {
+            int pos = 0;
+            ArrayList<Uri> list = new ArrayList<>();
+            for (int i = 0; i < mPlayList.size(); ++i) {
+                String rawName = mPlayList.get(i).get(CourseMap.Videos.COL_RAW_NAME);
+                if (rawName.equals(mRawName))
+                    pos = i;
+                String path = CourseApplication.getInstance().getCourseraPath()
+                        + File.separator + rawName;
+                Uri uri = Uri.fromFile(new File(path));
+                list.add(uri);
+            }
+            playVideo(list, pos);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         Log.d(TAG, "OnRestart.");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        Log.d(TAG, "OnSaveInstanceState.");
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     @Override
@@ -75,6 +107,7 @@ public class PlayerActivity extends AppCompatActivity
             finish();
             return true;
         }else if( id == android.R.id.home ){
+            Log.d(TAG, "On action home pressed.");
             finish();
             return true; //will not be handled
         }
@@ -108,6 +141,14 @@ public class PlayerActivity extends AppCompatActivity
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
         }
+    }
+
+    private void playVideo(ArrayList<Uri> list, int pos){
+        Intent intent = new Intent(this, PlayService.class);
+        intent.setAction(PlayService.ACTION_PLAY);
+        intent.putExtra(PlayService.KEY_POS, pos);
+        intent.putExtra(PlayService.KEY_PLAY_LIST, list);
+        startService(intent);
     }
 
     private void showSelectCourse(String rawName){

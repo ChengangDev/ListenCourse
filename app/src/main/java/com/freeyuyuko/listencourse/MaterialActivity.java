@@ -3,6 +3,7 @@ package com.freeyuyuko.listencourse;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -72,6 +73,12 @@ public class MaterialActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "OnDestory.");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        Log.d(TAG, "OnSaveInstanceState.");
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     @Override
@@ -172,6 +179,7 @@ public class MaterialActivity extends AppCompatActivity {
                         for(int i = 0; i < mVideos.size(); ++i)
 
                         MaterialActivity.this.startActivity(intent);
+
                     }
                 });
             }catch (Exception e){

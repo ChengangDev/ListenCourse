@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class PlayService extends Service implements MediaPlayer.OnPreparedListener,
@@ -16,7 +17,10 @@ public class PlayService extends Service implements MediaPlayer.OnPreparedListen
     private static final String TAG = "PlayService";
     public static final String KEY_PLAY_LIST = "playlist";
     public static final String KEY_POS = "pos";
-    private static final String ACTION_PLAY = "com.freeyuyuko.action.PLAY";
+    public static final String ACTION_PLAY = "com.freeyuyuko.action.PLAY";
+    public static final String ACTION_STOP = "com.freeyuyuko.action.STOP";
+    public static final String ACTION_NEXT = "com.freeyuyuko.action.NEXT";
+    public static final String ACTION_PREV = "com.freeyuyuko.action.PREV";
 
     private MediaPlayer mMediaPlayer = null;
     private ArrayList<Uri> mPlayList;
@@ -32,11 +36,13 @@ public class PlayService extends Service implements MediaPlayer.OnPreparedListen
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "OnStart.");
         if( mMediaPlayer != null )
             mMediaPlayer.release();
     }
 
     public int onStartCommand(Intent intent, int flags, int startId){
+        Log.d(TAG, "OnStartCommand.");
         try {
             mPlayList = intent.getExtras().getParcelableArrayList(KEY_PLAY_LIST);
             mPos = intent.getExtras().getInt(KEY_POS);
@@ -61,11 +67,13 @@ public class PlayService extends Service implements MediaPlayer.OnPreparedListen
     }
 
     public void onPrepared(MediaPlayer player){
+        Log.d(TAG, "OnPrepared.");
         player.start();
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+
         return false;
     }
 }
