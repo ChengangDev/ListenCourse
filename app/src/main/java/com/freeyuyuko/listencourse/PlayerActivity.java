@@ -31,11 +31,8 @@ public class PlayerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         Log.d(TAG, "OnCreate.");
 
-        if(savedInstanceState != null)
-        {
-            Log.d(TAG, "ReCreate.");
-            finish();
-        }
+        //new Exception("Stack Trace.").printStackTrace();
+
         setContentView(R.layout.activity_player);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -79,6 +76,24 @@ public class PlayerActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "OnPause.");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "OnStop.");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "OnDestroy");
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         Log.d(TAG, "OnSaveInstanceState.");
         super.onSaveInstanceState(outState, outPersistentState);
@@ -104,15 +119,22 @@ public class PlayerActivity extends AppCompatActivity
             return true;
         }else if( id == R.id.action_delete_video ){
             deleteFromList(mRawName);
-            finish();
+            //finish();
             return true;
         }else if( id == android.R.id.home ){
             Log.d(TAG, "On action home pressed.");
-            finish();
-            return true; //will not be handled
+            //finish();
+            //return true; //will not be handled
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        Log.d(TAG, "OnBackPressed.");
+        finish();
     }
 
     @Override
