@@ -7,8 +7,12 @@
         android:id="@+id/action_delete_video"
         android:orderInCategory="100"
         android:title="DEL"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_rename_video"
+        android:orderInCategory="100"
+        android:title="RENAME"
         app:showAsAction="always" />
-
     <item
         android:id="@+id/action_move"
         android:orderInCategory="100"

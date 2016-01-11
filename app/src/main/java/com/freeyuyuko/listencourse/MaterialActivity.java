@@ -130,6 +130,12 @@ public class MaterialActivity extends AppCompatActivity {
             try{
                 DbOperator dbOperator = new DbOperator(MaterialActivity.this);
                 mVideos = dbOperator.getVideosList(mCourseName);
+                for(int i = 0; i < mVideos.size(); ++i){
+                    String lessonName = mVideos.get(i).get(Videos.COL_LESSON_NAME);
+                    if( lessonName == null || lessonName.isEmpty() )
+                        mVideos.get(i).put(Videos.COL_LESSON_NAME,
+                                mVideos.get(i).get(Videos.COL_RAW_NAME));
+                }
             }catch(final Exception e){
                 e.printStackTrace();
                 MaterialActivity.this.runOnUiThread(new Runnable() {
@@ -156,7 +162,7 @@ public class MaterialActivity extends AppCompatActivity {
                         R.layout.item_of_videos_list,
                         new String[]{
                                 Videos.COL_SCHEDULE,
-                                Videos.COL_RAW_NAME
+                                Videos.COL_LESSON_NAME
                         },
                         new int[]{
                                 R.id.text_video_index,
@@ -170,8 +176,7 @@ public class MaterialActivity extends AppCompatActivity {
                                             View view, int position, long id) {
                         Intent intent = new Intent(MaterialActivity.this,
                                 PlayerActivity.class);
-                        intent.putExtra(Videos.COL_RAW_NAME, mVideos
-                                .get(position).get(Videos.COL_RAW_NAME));
+                        intent.putExtra("position", position);
                         ArrayList<HashMap<String,String>> list = new ArrayList<>();
                         for(int i = 0; i < mVideos.size(); ++i)
                             list.add(new HashMap<String, String>(mVideos.get(i)));

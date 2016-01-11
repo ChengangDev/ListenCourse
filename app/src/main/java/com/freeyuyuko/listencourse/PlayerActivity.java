@@ -1,5 +1,6 @@
 package com.freeyuyuko.listencourse;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +13,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
@@ -20,11 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayerActivity extends AppCompatActivity
-    implements SingleSelectDialog.CallBackSingleSelectFinished{
+    implements SingleSelectDialog.CallBackSingleSelectFinished,
+        InputDialog.CallBackInputFinished{
 
     private static final String TAG = "PlayerActivity";
 
-    private String mRawName;
+    private int mPos;
     private List<Map<String,String>> mPlayList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,25 +52,26 @@ public class PlayerActivity extends AppCompatActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
-        mRawName = bundle.getString(CourseMap.Videos.COL_RAW_NAME);
+        mPos = bundle.getInt("position");
         mPlayList = (List<Map<String,String>>)bundle.getSerializable("list");
 
         try {
-            int pos = 0;
+
             ArrayList<Uri> list = new ArrayList<>();
             for (int i = 0; i < mPlayList.size(); ++i) {
                 String rawName = mPlayList.get(i).get(CourseMap.Videos.COL_RAW_NAME);
-                if (rawName.equals(mRawName))
-                    pos = i;
+
                 String path = CourseApplication.getInstance().getCourseraPath()
                         + File.separator + rawName;
                 Uri uri = Uri.fromFile(new File(path));
                 list.add(uri);
             }
-            playVideo(list, pos);
+            playVideo(list, mPos);
         }catch (Exception e){
             e.printStackTrace();
         }
+
+        initButtons();
     }
 
     @Override
@@ -115,16 +120,19 @@ public class PlayerActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_move) {
-            showSelectCourse(mRawName);
+            showSelectCourse();
             return true;
         }else if( id == R.id.action_delete_video ){
-            deleteFromList(mRawName);
+            deleteFromList();
             //finish();
             return true;
         }else if( id == android.R.id.home ){
             Log.d(TAG, "On action home pressed.");
             //finish();
             //return true; //will not be handled
+        }else if( id == R.id.action_rename_video ){
+            showRenameDialog();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -153,16 +161,57 @@ public class PlayerActivity extends AppCompatActivity
             if(select.equalsIgnoreCase("Others"))
                 select = "";
 
+            String rawName = mPlayList.get(mPos).get(CourseMap.Videos.COL_RAW_NAME);
             //thread be better
             DbOperator operator = new DbOperator(this);
-            operator.moveVideoTo(mRawName, select, operator.getCourseCount(
-                    operator.getCourseNameOfVideo(mRawName)));
+            operator.moveVideoTo(rawName, select, operator.getCourseCount(
+                    operator.getCourseNameOfVideo(rawName)));
             //return
             finish();
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
         }
+    }
+
+    private void initButtons(){
+        findViewById(R.id.button_next).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PlayerActivity.this, PlayService.class);
+                intent.setAction(PlayService.ACTION_NEXT);
+                startService(intent);
+            }
+        });
+
+        findViewById(R.id.button_prev).setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PlayerActivity.this, PlayService.class);
+                intent.setAction(PlayService.ACTION_PREV);
+                startService(intent);
+            }
+        });
+
+        final Button btn = (Button)findViewById(R.id.button_status);
+        btn.setText("Playing");
+        btn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                String oldStatus = btn.getText().toString();
+                Intent intent = new Intent(PlayerActivity.this, PlayService.class);
+                if (oldStatus.equalsIgnoreCase("Playing")) {
+                    intent.setAction(PlayService.ACTION_PAUSE);
+                    btn.setText("Pause");
+                } else if (oldStatus.equalsIgnoreCase("Pause")) {
+                    intent.setAction(PlayService.ACTION_START_FROM_PAUSE);
+                    btn.setText("Playing");
+                }
+                startService(intent);
+            }
+        });
     }
 
     private void playVideo(ArrayList<Uri> list, int pos){
@@ -173,7 +222,7 @@ public class PlayerActivity extends AppCompatActivity
         startService(intent);
     }
 
-    private void showSelectCourse(String rawName){
+    private void showSelectCourse(){
         try {
             Bundle bundle = new Bundle();
             bundle.putString("title", "Select Course");
@@ -194,12 +243,55 @@ public class PlayerActivity extends AppCompatActivity
         }
     }
 
-    private void deleteFromList(String rawName){
+    private void deleteFromList(){
         try{
 
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showRenameDialog(){
+        try{
+            Bundle bundle = new Bundle();
+            bundle.putString("title", "Set Lesson Name");
+            bundle.putString("viewName", EditText.class.getName());
+            bundle.putString("input", mPlayList.get(mPos).get(CourseMap.Videos.COL_LESSON_NAME));
+            InputDialog dlg = new InputDialog();
+            dlg.setArguments(bundle);
+            dlg.show(getFragmentManager(), "SetLessonName");
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    @Override
+    public void OnInputFinished(String input, int which) {
+        if( which == DialogInterface.BUTTON_POSITIVE ){
+            if( input == null || input.isEmpty() ) {
+                Toast.makeText(this, "Course name can not be empty.",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try{
+                //thread be better
+                DbOperator dbOperator = new DbOperator(this);
+                String rawName = mPlayList.get(mPos).get(CourseMap.Videos.COL_RAW_NAME);
+                dbOperator.setLessonNameOfVideo(rawName, input);
+
+                Log.d(TAG, String.format("Set Lesson Name %s.", input));
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Toast.makeText(this, e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
 }

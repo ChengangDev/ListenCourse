@@ -49,6 +49,7 @@ public class InputDialog extends DialogFragment {
         }
 
         mEditView.setText(args.getString("input"));
+        mEditView.setSelectAllOnFocus(true);
         builder.setView(mEditView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override

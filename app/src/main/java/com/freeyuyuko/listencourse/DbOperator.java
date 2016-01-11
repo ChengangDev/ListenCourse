@@ -197,6 +197,7 @@ public class DbOperator {
             map.put(Videos.COL_LESSON_NAME, c.getString(
                     c.getColumnIndexOrThrow(Videos.COL_LESSON_NAME)
             ));
+
             map.put(KEY_MANAGED_VIDEO_NAME,
                     getManagedVideoName(
                             map.get(Videos.COL_RAW_NAME),
