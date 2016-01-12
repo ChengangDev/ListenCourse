@@ -2,7 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.freeyuyuko.listencourse.MainActivity">
-
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="100"
+        android:title="Refresh"
+        app:showAsAction="always" />
+    
     <item
         android:id="@+id/action_add_video"
         android:orderInCategory="100"
@@ -10,9 +15,10 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_refresh"
+        android:id="@+id/action_move_all"
         android:orderInCategory="100"
-        android:title="Refresh"
-        app:showAsAction="always" />
+        android:title="Move All"
+        app:showAsAction="never"
+        />
 
 </menu>

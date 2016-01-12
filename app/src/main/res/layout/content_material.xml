@@ -16,6 +16,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
         <TextView
+            android:id="@+id/text_course_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="32sp"

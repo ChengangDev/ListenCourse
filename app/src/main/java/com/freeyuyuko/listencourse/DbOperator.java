@@ -340,9 +340,9 @@ public class DbOperator {
         int pivot = getScheduleOfVideo(rawNamePreferred);
         String rawSql = String.format(
                 "update %s set %s = %s + 1 where " +
-                        "%s = '%s' and " +
+                        "%s = \"%s\" and " +
                         "%s >= %d and " +
-                        "%s != '%s'",
+                        "%s != \"%s\"",
                 Videos.TABLE_NAME, Videos.COL_SCHEDULE, Videos.COL_SCHEDULE,
                 Videos.COL_COURSE_NAME, courseName,
                 Videos.COL_SCHEDULE, pivot,

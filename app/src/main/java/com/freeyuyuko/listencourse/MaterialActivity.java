@@ -1,5 +1,6 @@
 package com.freeyuyuko.listencourse;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.freeyuyuko.listencourse.CourseMap.Courses;
@@ -25,14 +27,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MaterialActivity extends AppCompatActivity {
+public class MaterialActivity extends AppCompatActivity implements
+        SingleSelectDialog.CallBackSingleSelectFinished{
 
     private static final String TAG = "MaterialActivity";
 
     private String mCourseName;
+    private List<Map<String, String>> mVideos;
     private ListView mListViewVideo;
 
     private UpdateMaterialListTask mTask;
+    private MoveVideoTask mMoveTask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +61,7 @@ public class MaterialActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mCourseName = intent.getExtras()
                 .getString(Courses.COL_COURSE_NAME);
+        ((TextView)findViewById(R.id.text_course_name)).setText(mCourseName);
         if(mCourseName.equalsIgnoreCase("others"))
             mCourseName = "";
 
@@ -106,6 +112,9 @@ public class MaterialActivity extends AppCompatActivity {
             Log.d(TAG, "On action home pressed.");
             finish();
             return true;
+        }else if( id == R.id.action_move_all ){
+            showSelectCourse();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -120,10 +129,12 @@ public class MaterialActivity extends AppCompatActivity {
         mTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, null);
     }
 
+
+
     private class UpdateMaterialListTask extends AsyncTask<Void, Void, Boolean>{
 
         private static final String TAG = "UpdateMaterialListTask";
-        private List<Map<String, String>> mVideos;
+
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -191,6 +202,88 @@ public class MaterialActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast.makeText(MaterialActivity.this,
                         e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void showSelectCourse(){
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putString("title", "Select Course");
+
+            DbOperator operator = new DbOperator(this);
+            List<Map<String,String>> listMap = operator.getCoursesList();
+            ArrayList<String> list = new ArrayList<>();
+            for(int i = 0; i < listMap.size(); ++i ){
+                list.add(listMap.get(i).get(CourseMap.Courses.COL_COURSE_NAME));
+            }
+            bundle.putStringArrayList("list", list);
+            SingleSelectDialog dlg = new SingleSelectDialog();
+            dlg.setArguments(bundle);
+            dlg.show(getFragmentManager(), "Select Course");
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void OnSingleSelectFinished(String select, boolean bOk) {
+        if(mMoveTask != null){
+            Toast.makeText(this, "Already have a move task.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(select.equalsIgnoreCase("Others"))
+            select = "";
+
+        if(select.equals(mCourseName))
+            return;
+
+        mMoveTask = new MoveVideoTask(this, mVideos, select);
+        mMoveTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, null);
+    }
+
+    public class MoveVideoTask extends AsyncTask<Void, Integer, Boolean>{
+        private static final String TAG = "MoveVideoTask";
+
+        private final Activity mAct;
+        private final List<Map<String,String>> mList;
+        private final String mCourseName;
+
+        public MoveVideoTask(Activity act, List<Map<String,String>> list, String courseName){
+            mAct = act;
+            mList = list;
+            mCourseName = courseName;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            Log.d(TAG, "Do move task.");
+            try{
+                DbOperator operator = new DbOperator(mAct);
+
+                for(int i = 0; i < mList.size(); ++i){
+                    String rawName = mVideos.get(i).get(CourseMap.Videos.COL_RAW_NAME);
+                    String oldCourseName = operator.getCourseNameOfVideo(rawName);
+                    operator.moveVideoTo(rawName, mCourseName, operator.getCourseCount(
+                            oldCourseName));
+                    Log.d(TAG, String.format("%d)Move %s from %s to %s",
+                            i+1, rawName, oldCourseName, mCourseName));
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            mMoveTask = null;
+            if(aBoolean){
+                Toast.makeText(mAct, "Move Success.", Toast.LENGTH_SHORT);
+                updateMaterialList();
             }
         }
     }

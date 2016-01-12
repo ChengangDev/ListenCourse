@@ -1,8 +1,10 @@
 package com.freeyuyuko.listencourse;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -56,6 +59,10 @@ public class PlayerActivity extends AppCompatActivity
         mPlayList = (List<Map<String,String>>)bundle.getSerializable("list");
 
         try {
+
+            ((TextView)findViewById(R.id.text_video_name)).setText(
+                    mPlayList.get(mPos).get(CourseMap.Videos.COL_LESSON_NAME)
+            );
 
             ArrayList<Uri> list = new ArrayList<>();
             for (int i = 0; i < mPlayList.size(); ++i) {
@@ -294,4 +301,5 @@ public class PlayerActivity extends AppCompatActivity
 
         }
     }
+
 }

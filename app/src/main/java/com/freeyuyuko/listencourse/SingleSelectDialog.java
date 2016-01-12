@@ -22,6 +22,8 @@ public class SingleSelectDialog extends DialogFragment {
     private static final String TAG = "SingleSelectDialog";
     private RadioGroup mRadioGroup;
 
+    private CallBackSingleSelectFinished mCallback = null;
+
     public SingleSelectDialog(){
 
     }
@@ -96,6 +98,16 @@ public class SingleSelectDialog extends DialogFragment {
                     });
         }
         return builder.create();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+//        if(mCallback != null)
+//            mCallback.OnSingleSelectFinished();
+    }
+
+    public void setCallBackSingleSelectFinished(CallBackSingleSelectFinished callback){
+        mCallback = callback;
     }
 
 
